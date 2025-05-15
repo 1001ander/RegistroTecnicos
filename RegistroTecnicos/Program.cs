@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using RegistroTecnicos.Components;
+using RegistroTecnicos.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddDbContext<Contexto>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
