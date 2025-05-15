@@ -69,7 +69,8 @@ public class TecnicosService(IDbContextFactory<Contexto> DbFactory)
         await using var contexto = await DbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
             .AnyAsync(t => t.TecnicosId != tecnicosId && 
-            t.Nombres.ToLower().Equals(nombres.ToLower()));
+            t.Nombres.ToLower().Equals(nombres.ToLower() ?? "")); 
+                                                                  
     }
 
 
