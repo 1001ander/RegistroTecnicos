@@ -1,0 +1,118 @@
+﻿@page "/Tecnico/Edit/{TecnicoId:int}"
+@using RegistroTecnicos.Models
+@using RegistroTecnicos.Services
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject TecnicosService tecnicosService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Editar Técnico</PageTitle>
+
+<EditForm Model="Tecnico" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title">Editar Técnico</h5>
+            </div>
+
+            <div class="card-body">
+                <!-- Campo Nombres con validación -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombres</strong></label>
+                    <InputText class="form-control" @bind-Value="Tecnico.Nombres" />
+                    <ValidationMessage For="@(() => Tecnico.Nombres)" />
+                </div>
+
+                <!-- Campo SueldoHora con validación -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>Sueldo por Hora</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Tecnico.SueldoHora" />
+                    <ValidationMessage For="@(() => Tecnico.SueldoHora)" />
+                </div>
+            </div>
+
+            <div class="card-footer text-center mt-2 bg-light">
+                <a href="/Tecnico/Index" class="btn btn-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-floppy"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-danger" @onclick="Eliminar">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int TecnicoId { get; set; }
+
+    public Tecnicos Tecnico { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Tecnico = await tecnicosService.Buscar(TecnicoId) ?? new Tecnicos();
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            if (await tecnicosService.ExisteTecnico(Tecnico.TecnicosId, Tecnico.Nombres!))
+            {
+                toastService.ShowWarning("Ya existe un técnico con este nombre");
+                return;
+            }
+
+            var resultado = await tecnicosService.Guardar(Tecnico);
+
+            if (resultado)
+            {
+                toastService.ShowSuccess("Técnico guardado correctamente");
+                navigationManager.NavigateTo("/Tecnico/Index");
+            }
+            else
+            {
+                toastService.ShowError("Error al guardar los cambios");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        try
+        {
+            var confirmado = await jsRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de eliminar este técnico?");
+            if (!confirmado) return;
+
+            var eliminado = await tecnicosService.Eliminar(Tecnico.TecnicosId);
+
+            if (eliminado)
+            {
+                toastService.ShowSuccess("Técnico eliminado correctamente");
+                navigationManager.NavigateTo("/Tecnico/Index");
+            }
+            else
+            {
+                toastService.ShowError("No se pudo eliminar el técnico");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al eliminar: {ex.Message}");
+        }
+    }
+}
