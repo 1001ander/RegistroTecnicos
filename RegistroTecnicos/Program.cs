@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 //Inyeccion del contexto
-builder.Services.AddDbContext<Contexto>(options =>
+builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //Inyeccion del service
