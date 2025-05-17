@@ -9,37 +9,41 @@
 
 <PageTitle>Crear Técnico</PageTitle>
 
-<EditForm Model="tecnico" OnValidSubmit="Guardar">
+<EditForm Model="tecnico" OnValidSubmit="Guardar" FormName="formCrearTecnico">
     <DataAnnotationsValidator />
+    <ValidationSummary />
 
     <div class="container">
         <div class="card shadow-lg">
             @*Header*@
-            <div class="card-header text-center">
+            <div class="card-header text-center bg-primary text-white">
                 <h5 class="card-title">Crear Técnico</h5>
             </div>
+
             @*Body*@
             <div class="card-body">
+                @*Nombres*@
                 <div class="mb-3">
-                    @*Nombres*@
                     <label class="form-label"><strong>Nombres</strong></label>
-                    <InputText class="form-control" @bind-Value="tecnico.Nombres"></InputText>
-                    <ValidationMessage For="(() => tecnico.Nombres)" />
+                    <InputText class="form-control" @bind-Value="tecnico.Nombres" />
+                    <ValidationMessage For="@(() => tecnico.Nombres)" />
                 </div>
+
                 @*Sueldo Hora*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Sueldo por Hora</strong></label>
-                    <InputNumber class="form-control" @bind-Value="tecnico.SueldoHora"></InputNumber>
-                    <ValidationMessage For="(() => tecnico.SueldoHora)" />
+                    <InputNumber class="form-control" @bind-Value="tecnico.SueldoHora" />
+                    <ValidationMessage For="@(() => tecnico.SueldoHora)" />
                 </div>
             </div>
+
             @*Footer*@
-            <div class="card-footer text-center mt-2">
+            <div class="card-footer text-center mt-2 bg-light">
                 <a href="/Tecnicos/Index" class="btn btn-secondary me-2">
-                    <span class="bi bi-arrow-left"></span> Volver
+                    <i class="bi bi-arrow-left"></i> Volver
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    <span class="bi bi-floppy"></span> Guardar
+                    <i class="bi bi-floppy"></i> Guardar
                 </button>
             </div>
         </div>
@@ -51,21 +55,35 @@
 
     private async Task Guardar()
     {
-        if (await tecnicosService.ExisteTecnico(tecnico.TecnicosId, tecnico.Nombres))
+        try
         {
-            toastService.ShowError("Ya existe un técnico con este nombre");
-            return;
-        }
+            if (string.IsNullOrWhiteSpace(tecnico.Nombres))
+            {
+                toastService.ShowWarning("El nombre no puede estar vacío");
+                return;
+            }
 
-        var creado = await tecnicosService.Guardar(tecnico);
-        if (creado)
-        {
-            toastService.ShowSuccess("Técnico creado exitosamente");
-            navigationManager.NavigateTo("/Tecnicos/Index");
+            if (await tecnicosService.ExisteTecnico(tecnico.TecnicosId, tecnico.Nombres!))
+            {
+                toastService.ShowError("Ya existe un técnico con este nombre");
+                return;
+            }
+
+            var resultado = await tecnicosService.Guardar(tecnico);
+
+            if (resultado)
+            {
+                toastService.ShowSuccess("Técnico creado exitosamente");
+                navigationManager.NavigateTo("/Tecnicos/Index");
+            }
+            else
+            {
+                toastService.ShowError("Error al guardar el técnico");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            toastService.ShowError("Error al guardar el técnico");
+            toastService.ShowError($"Error inesperado: {ex.Message}");
         }
     }
 }
