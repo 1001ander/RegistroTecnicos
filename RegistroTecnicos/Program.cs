@@ -5,6 +5,8 @@ using RegistroTecnicos.DAL;
 using RegistroTecnicos.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+// Inyeccion del servicio Toast 
+builder.Services.AddBlazoredToast();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -16,10 +18,7 @@ builder.Services.AddDbContextFactory<Contexto>(options =>
 //Inyeccion del service
 builder.Services.AddScoped<TecnicosService>();
 
-// Inyeccion del servicio de Bootstrap
-builder.Services.AddBlazorBootstrap();
-// Inyeccion del servicio Toast 
-builder.Services.AddBlazoredToast();
+
 
 
 
