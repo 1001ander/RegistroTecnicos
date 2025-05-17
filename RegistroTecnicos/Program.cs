@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using Microsoft.EntityFrameworkCore;
 using RegistroTecnicos.Components;
 using RegistroTecnicos.DAL;
@@ -17,6 +18,8 @@ builder.Services.AddScoped<TecnicosService>();
 
 // Inyeccion del servicio de Bootstrap
 builder.Services.AddBlazorBootstrap();
+// Inyeccion del servicio Toast 
+builder.Services.AddBlazoredToast();
 
 
 
