@@ -15,6 +15,10 @@ builder.Services.AddDbContext<Contexto>(options =>
 //Inyeccion del service
 builder.Services.AddScoped<TecnicosService>();
 
+// Inyeccion del servicio de Bootstrap
+builder.Services.AddBlazorBootstrap();
+
+
 
 var app = builder.Build();
 
