@@ -1,0 +1,122 @@
+﻿@page "/Tecnicos/Index"
+@using RegistroTecnicos.Services
+@using RegistroTecnicos.Models
+@inject TecnicosService tecnicosService
+@inject NavigationManager navigationManager
+
+<PageTitle>Registro de T&eacute;cnicos</PageTitle>
+<div class="container">
+    <div class="card showdow-lg">
+        <div class="card-header space-between">
+            <h5 class="card-tittle ">Registro de T&eacute;cnicos </h5>
+            <a href="/Tecnicos/Create" class="btn btn-primary"> <span class="bi bi-plus-square- mt3"></span> Crear</a>
+
+        </div>
+        <div class="card-body">
+
+            @*Labels*@
+            <div class="row">
+
+                @*Filtrar por*@
+                <div class="col-3">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+
+                </div>
+                @*ValorFiltro*@
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                </div>
+            </div>
+            @*Inpust y botones*@
+            <div class="row aling-items-center">
+                @*Filtro*@
+                <div class="col-3">
+                    <select class="form-select" @bin-Value="Filtro">
+                        <option value="" selected disable>Elija una opci&Oacute;n</option>
+                        <option value="Id">TecnicoId</option>
+                        <option value="Nombres">Nombres</option>
+                    </select>
+
+                </div>
+                @*Busqueda*@
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+
+            </div>
+            <table class="table table-hover">
+                <thead class="table table-striped text-black">
+                    <tr>
+                        <th>TecnicoId</th>
+                        <th>Nombres</th>
+                        <th>SueldoHora</th>
+
+                        <th>Opciones</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var tecnico in ListaTecnicos)
+                    {
+                        <tr>
+
+                            <td> @tecnico.TecnicosId</td>
+                            <td> @tecnico.Nombres</td>
+                            <td> @tecnico.SueldoHora</td>
+
+                            <td class="text-center">
+                                <a href="/Tecnico/Edit/@tecnico.TecnicosId" class="btn btn-outline-primary bi bi-pencil-square"></a>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer space-between">
+            <label>Cantidad de Tecnicos: @ListaTecnicos.Count()</label>
+
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    public List<Tecnicos> ListaTecnicos { get; set; } = new List<Tecnicos>();
+
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync() 
+    {
+        ListaTecnicos = await tecnicosService.Listar(t => t.TecnicosId > 0);
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "Id" && int.TryParse(ValorFiltro, out int tecnicoId))
+            {
+                ListaTecnicos = await tecnicosService.Listar(t => t.TecnicosId == tecnicoId);
+            }
+            else if (Filtro == "Nombres")
+            {
+                ListaTecnicos = await tecnicosService.Listar(t => t.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+        {
+            ListaTecnicos = await tecnicosService.Listar(t => t.TecnicosId > 0);
+        }
+
+
+
+
+    }
+}
