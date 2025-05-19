@@ -5,74 +5,77 @@ using System.Linq.Expressions;
 
 namespace RegistroTecnicos.Services;
 
-//Guardar PUBLICO
-//Existe  PRIVADO
-//Insertar PRIVADO
-//Modificar PRIVADO
-//Buscar PUBLICO
-//Eliminar PUBLICO
-//Listar PUBLICO 
-//Existe PUBLICO 
-
-public class TecnicosService(IDbContextFactory<Contexto> DbFactory)
+public class TecnicosService
 {
-    public async Task<bool> Guardar(Tecnicos tecnicos)
-    {
-        if (!await Existe(tecnicos.TecnicosId))
-            return await Insertar(tecnicos);
-        else
-            return await Modificar(tecnicos);
+    private readonly IDbContextFactory<Contexto> _dbFactory;
 
-    }
-    private async Task<bool> Existe(int tecnicosId)
+    public TecnicosService(IDbContextFactory<Contexto> dbFactory)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+        _dbFactory = dbFactory;
+    }
+
+    public async Task<bool> Guardar(Tecnicos tecnico)
+    {
+        if (tecnico.TecnicosId == 0)
+            return await Insertar(tecnico);
+        else
+            return await Modificar(tecnico);
+    }
+
+    public async Task<bool> Existe(int tecnicosId)
+    {
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
             .AnyAsync(t => t.TecnicosId == tecnicosId);
     }
-    private async Task<bool> Insertar(Tecnicos tecnicos) 
+
+    private async Task<bool> Insertar(Tecnicos tecnicos)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
         contexto.Tecnicos.Add(tecnicos);
         return await contexto.SaveChangesAsync() > 0;
     }
-    private async Task<bool> Modificar(Tecnicos tecnicos) 
+
+    private async Task<bool> Modificar(Tecnicos tecnicos)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
-        contexto.Update(tecnicos);
-        return await contexto
-            .SaveChangesAsync() > 0;
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
+        contexto.Tecnicos.Update(tecnicos);
+        return await contexto.SaveChangesAsync() > 0;
     }
-    public async Task<Tecnicos?> Buscar(int tecnicosId) 
+
+    public async Task<Tecnicos?> Buscar(int tecnicosId)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
+            .AsNoTracking()
             .FirstOrDefaultAsync(t => t.TecnicosId == tecnicosId);
-            
     }
-    public async Task<bool> Eliminar(int tecnicosId) 
+
+    public async Task<bool> Eliminar(int tecnicosId)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
             .Where(t => t.TecnicosId == tecnicosId)
             .ExecuteDeleteAsync() > 0;
     }
-    public async Task<List<Tecnicos>> Listar(Expression<Func<Tecnicos, bool>> criterio) 
+
+    public async Task<List<Tecnicos>> Listar(Expression<Func<Tecnicos, bool>> criterio)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
             .Where(criterio)
+            .AsNoTracking()
             .ToListAsync();
     }
+
     public async Task<bool> ExisteTecnico(int tecnicosId, string nombres)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+        if (string.IsNullOrWhiteSpace(nombres))
+            return false;
+
+        await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
-            .AnyAsync(t => t.TecnicosId != tecnicosId && 
-            t.Nombres.ToLower().Equals(nombres.ToLower() ?? "")); 
-                                                                  
+            .AnyAsync(t => t.TecnicosId != tecnicosId &&
+                          t.Nombres.ToLower() == nombres.ToLower());
     }
-
-
-    
 }

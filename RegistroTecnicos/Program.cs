@@ -15,6 +15,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddBlazorBootstrap();
+
 //Inyeccion del service
 builder.Services.AddScoped<TecnicosService>();
 
