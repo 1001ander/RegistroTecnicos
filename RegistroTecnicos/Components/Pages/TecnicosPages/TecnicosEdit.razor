@@ -22,14 +22,14 @@
             </div>
 
             <div class="card-body">
-                <!-- Campo Nombres con validación -->
+                @*Campo Nombres*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Nombres</strong></label>
                     <InputText class="form-control" @bind-Value="Tecnico.Nombres" />
                     <ValidationMessage For="@(() => Tecnico.Nombres)" />
                 </div>
 
-                <!-- Campo SueldoHora con validación -->
+                @*Campo Sueldo*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Sueldo por Hora</strong></label>
                     <InputNumber class="form-control" @bind-Value="Tecnico.SueldoHora" />
