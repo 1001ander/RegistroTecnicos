@@ -1,49 +1,46 @@
-﻿@page "/Tecnicos/Create"
+﻿@page "/Tecnico/Create"
 @using RegistroTecnicos.Models
 @using RegistroTecnicos.Services
-@using Blazored.Toast
 @using Blazored.Toast.Services
+@using System.ComponentModel.DataAnnotations
 @inject TecnicosService tecnicosService
 @inject NavigationManager navigationManager
-@inject IToastService toastService
+@rendermode InteractiveServer
 
-<PageTitle>Crear Técnico</PageTitle>
 
-<EditForm Model="tecnico" OnValidSubmit="Guardar" FormName="formCrearTecnico">
+<EditForm Model="tecnicos" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
-    <div class="container">
-        <div class="card shadow-lg">
-            @*Header*@
-            <div class="card-header text-center bg-primary text-white">
-                <h5 class="card-title">Crear Técnico</h5>
+
+    <div class="container mt-3">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h5>Crear Técnico</h5>
             </div>
 
-            @*Body*@
             <div class="card-body">
                 @*Nombres*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Nombres</strong></label>
-                    <InputText class="form-control" @bind-Value="tecnico.Nombres" />
-                    <ValidationMessage For="@(() => tecnico.Nombres)" />
+                    <InputText @bind-Value="tecnicos.Nombres" class ="form-control" />
+                    <ValidationMessage For="@(() => tecnicos.Nombres)" />
                 </div>
 
-                @*Sueldo Hora*@
+                <!-- Campo Sueldo -->
                 <div class="mb-3">
                     <label class="form-label"><strong>Sueldo por Hora</strong></label>
-                    <InputNumber class="form-control" @bind-Value="tecnico.SueldoHora" />
-                    <ValidationMessage For="@(() => tecnico.SueldoHora)" />
+                    <InputNumber @bind-Value="tecnicos.SueldoHora" class="form-control"/>
+                      
+                    <ValidationMessage For="@(() => tecnicos.SueldoHora)" />
                 </div>
             </div>
 
-            @*Footer*@
-            <div class="card-footer text-center mt-2 bg-light">
-                <a href="/Tecnicos/Index" class="btn btn-secondary me-2">
+            <div class="card-footer text-center">
+                <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
                     <i class="bi bi-arrow-left"></i> Volver
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-floppy"></i> Guardar
+                </button>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Guardar
                 </button>
             </div>
         </div>
@@ -51,39 +48,49 @@
 </EditForm>
 
 @code {
-    private Tecnicos tecnico { get; set; } = new Tecnicos();
+    [Parameter]
+    public int TecnicoId { get; set; }
+    public Tecnicos tecnicos { get; set; } = new Tecnicos();
+    private bool existe = false;
 
-    private async Task Guardar()
+    public async Task Nuevo()
     {
-        try
+        tecnicos = new Tecnicos();
+        existe = false;
+    }
+    public async Task Buscar()
+    {
+        existe = false;
+        var encontrado = await tecnicosService.Buscar(tecnicos.TecnicosId);
+        if (encontrado != null)
         {
-            if (string.IsNullOrWhiteSpace(tecnico.Nombres))
-            {
-                toastService.ShowWarning("El nombre no puede estar vacío");
-                return;
-            }
-
-            if (await tecnicosService.ExisteTecnico(tecnico.TecnicosId, tecnico.Nombres!))
-            {
-                toastService.ShowError("Ya existe un técnico con este nombre");
-                return;
-            }
-
-            var resultado = await tecnicosService.Guardar(tecnico);
-
-            if (resultado)
-            {
-                toastService.ShowSuccess("Técnico creado exitosamente");
-                navigationManager.NavigateTo("/Tecnicos/Index");
-            }
-            else
-            {
-                toastService.ShowError("Error al guardar el técnico");
-            }
+            tecnicos = encontrado;
         }
-        catch (Exception ex)
+        else
         {
-            toastService.ShowError($"Error inesperado: {ex.Message}");
+            Nuevo();
         }
+    }
+    public async Task<bool> Validar()
+    {
+        existe = await tecnicosService.Existe(tecnicos.TecnicosId);
+        return !existe;
+    }
+    public async Task Guardar()
+    {
+        if (!await Validar())
+        {
+            return;
+        }
+        var guardado = await tecnicosService.Guardar(tecnicos);
+        if (guardado)
+        {
+            Nuevo();
+            Volver();
+        }
+    }
+    public async Task Volver()
+    {
+        navigationManager.NavigateTo("/Tecnicos/Index");
     }
 }
