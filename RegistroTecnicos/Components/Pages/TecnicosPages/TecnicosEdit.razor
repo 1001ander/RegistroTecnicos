@@ -37,16 +37,17 @@
                 </div>
             </div>
 
-            <div class="card-footer text-center mt-2 bg-light">
-                <a href="/Tecnico/Index" class="btn btn-secondary me-2">
+            <div class="card-footer text-center">
+                <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
                     <i class="bi bi-arrow-left"></i> Volver
-                </a>
-                <button type="submit" class="btn btn-primary me-2">
-                    <i class="bi bi-floppy"></i> Guardar
+                </button>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Guardar
                 </button>
                 <button type="button" class="btn btn-danger" @onclick="Eliminar">
-                    <i class="bi bi-trash"></i> Eliminar
+                    <i class="bi bi-arrow-left"></i> Eliminar
                 </button>
+                
             </div>
         </div>
     </div>
@@ -56,11 +57,16 @@
     [Parameter]
     public int TecnicoId { get; set; }
 
-    public Tecnicos Tecnico { get; set; } = new();
+    public Tecnicos Tecnico { get; set; } = new Tecnicos();
 
     protected override async Task OnInitializedAsync()
     {
         Tecnico = await tecnicosService.Buscar(TecnicoId) ?? new Tecnicos();
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Tecnicos/Index");
     }
 
     private async Task Guardar()
@@ -69,7 +75,7 @@
         {
             if (await tecnicosService.ExisteTecnico(Tecnico.TecnicosId, Tecnico.Nombres!))
             {
-                toastService.ShowWarning("Ya existe un técnico con este nombre");
+
                 return;
             }
 
@@ -77,13 +83,10 @@
 
             if (resultado)
             {
-                toastService.ShowSuccess("Técnico guardado correctamente");
-                navigationManager.NavigateTo("/Tecnico/Index");
+                
+               navigationManager.NavigateTo("/Tecnicos/Index");
             }
-            else
-            {
-                toastService.ShowError("Error al guardar los cambios");
-            }
+           
         }
         catch (Exception ex)
         {
@@ -103,7 +106,7 @@
             if (eliminado)
             {
                 toastService.ShowSuccess("Técnico eliminado correctamente");
-                navigationManager.NavigateTo("/Tecnico/Index");
+                navigationManager.NavigateTo("/Tecnicos/Index");
             }
             else
             {
