@@ -7,10 +7,8 @@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
-
 <EditForm Model="tecnicos" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-
 
     <div class="container mt-3">
         <div class="card shadow">
@@ -22,26 +20,30 @@
                 @*Nombres*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Nombres</strong></label>
-                    <InputText @bind-Value="tecnicos.Nombres" class ="form-control" />
+                    <InputText @bind-Value="tecnicos.Nombres" class="form-control" />
                     <ValidationMessage For="@(() => tecnicos.Nombres)" />
                 </div>
 
                 @*Campo Sueldo*@ 
                 <div class="mb-3">
                     <label class="form-label"><strong>Sueldo por Hora</strong></label>
-                    <InputNumber @bind-Value="tecnicos.SueldoHora" class="form-control"/>
-                      
+                    <InputNumber @bind-Value="tecnicos.SueldoHora" class="form-control" />
                     <ValidationMessage For="@(() => tecnicos.SueldoHora)" />
                 </div>
             </div>
 
             <div class="card-footer text-center">
-                <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
-                    <i class="bi bi-arrow-left"></i> Volver
-                </button>
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-check-circle"></i> Guardar
-                </button>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    <button type="submit" class="btn btn-outline-success me-2">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" @onclick="Nuevo">
+                        <i class="bi bi-eraser"></i> Limpiar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -58,10 +60,11 @@
         tecnicos = new Tecnicos();
         existe = false;
     }
+
     public async Task Buscar()
     {
         existe = false;
-        var encontrado = await tecnicosService.Buscar(tecnicos.TecnicosId);
+        var encontrado = await tecnicosService.Buscar(tecnicos.TecnicoId);
         if (encontrado != null)
         {
             tecnicos = encontrado;
@@ -71,11 +74,13 @@
             Nuevo();
         }
     }
+
     public async Task<bool> Validar()
     {
-        existe = await tecnicosService.Existe(tecnicos.TecnicosId);
+        existe = await tecnicosService.Existe(tecnicos.TecnicoId);
         return !existe;
     }
+
     public async Task Guardar()
     {
         if (!await Validar())
@@ -89,6 +94,7 @@
             Volver();
         }
     }
+
     public async Task Volver()
     {
         navigationManager.NavigateTo("/Tecnicos/Index");

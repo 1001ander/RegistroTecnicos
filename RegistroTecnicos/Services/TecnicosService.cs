@@ -16,7 +16,7 @@ public class TecnicosService
 
     public async Task<bool> Guardar(Tecnicos tecnico)
     {
-        if (tecnico.TecnicosId == 0)
+        if (tecnico.TecnicoId == 0)
             return await Insertar(tecnico);
         else
             return await Modificar(tecnico);
@@ -26,7 +26,7 @@ public class TecnicosService
     {
         await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
-            .AnyAsync(t => t.TecnicosId == tecnicosId);
+            .AnyAsync(t => t.TecnicoId == tecnicosId);
     }
 
     private async Task<bool> Insertar(Tecnicos tecnicos)
@@ -48,14 +48,14 @@ public class TecnicosService
         await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
             .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.TecnicosId == tecnicosId);
+            .FirstOrDefaultAsync(t => t.TecnicoId == tecnicosId);
     }
 
     public async Task<bool> Eliminar(int tecnicosId)
     {
         await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
-            .Where(t => t.TecnicosId == tecnicosId)
+            .Where(t => t.TecnicoId == tecnicosId)
             .ExecuteDeleteAsync() > 0;
     }
 
@@ -75,7 +75,7 @@ public class TecnicosService
 
         await using var contexto = await _dbFactory.CreateDbContextAsync();
         return await contexto.Tecnicos
-            .AnyAsync(t => t.TecnicosId != tecnicosId &&
+            .AnyAsync(t => t.TecnicoId != tecnicosId &&
                           t.Nombres.ToLower() == nombres.ToLower());
     }
 }
