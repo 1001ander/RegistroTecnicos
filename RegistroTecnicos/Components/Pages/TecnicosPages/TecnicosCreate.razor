@@ -61,7 +61,7 @@
     public async Task Buscar()
     {
         existe = false;
-        var encontrado = await tecnicosService.Buscar(tecnicos.TecnicosId);
+        var encontrado = await tecnicosService.Buscar(tecnicos.TecnicoId);
         if (encontrado != null)
         {
             tecnicos = encontrado;
@@ -73,7 +73,7 @@
     }
     public async Task<bool> Validar()
     {
-        existe = await tecnicosService.Existe(tecnicos.TecnicosId);
+        existe = await tecnicosService.Existe(tecnicos.TecnicoId);
         return !existe;
     }
     public async Task Guardar()
