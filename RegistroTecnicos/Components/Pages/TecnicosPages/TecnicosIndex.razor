@@ -30,11 +30,11 @@
             @foreach (var tecnicos in ListaTecnicos)
             {
                 <tr>
-                    <td>@tecnicos.TecnicosId</td>
+                    <td>@tecnicos.TecnicoId</td>
                     <td>@tecnicos.Nombres</td>
                     <td>@tecnicos.SueldoHora</td>
                     <td>
-                        <a href="/Tecnico/Edit/@tecnicos.TecnicosId" class="btn btn-outline-secondary" style="color: #FF7043; border-color: #FF7043;" onmouseover="this.style.backgroundColor='#FF7043'; this.style.color='#FFFFFF';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#FF7043';"><span class="bi bi-pencil"></span></a>
+                        <a href="/Tecnico/Edit/@tecnicos.TecnicoId" class="btn btn-outline-secondary" style="color: #FF7043; border-color: #FF7043;" onmouseover="this.style.backgroundColor='#FF7043'; this.style.color='#FFFFFF';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#FF7043';"><span class="bi bi-pencil"></span></a>
                     </td>
                 </tr>
             }
@@ -52,20 +52,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaTecnicos = await tecnicosService.Listar(t => t.TecnicosId > 0);
+        ListaTecnicos = await tecnicosService.Listar(t => t.TecnicoId > 0);
     }
 
     private async Task Buscar()
     {
         if (string.IsNullOrWhiteSpace(ValorFiltro))
         {
-            ListaTecnicos = await tecnicosService.Listar(t => t.TecnicosId > 0);
+            ListaTecnicos = await tecnicosService.Listar(t => t.TecnicoId > 0);
             return;
         }
 
         if (Filtro == "Id" && int.TryParse(ValorFiltro, out int tecnicoId))
         {
-            ListaTecnicos = await tecnicosService.Listar(t => t.TecnicosId == tecnicoId);
+            ListaTecnicos = await tecnicosService.Listar(t => t.TecnicoId == tecnicoId);
         }
         else if (Filtro == "Nombres")
         {

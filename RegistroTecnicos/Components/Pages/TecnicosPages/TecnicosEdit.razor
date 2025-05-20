@@ -73,7 +73,7 @@
     {
         try
         {
-            if (await tecnicosService.ExisteTecnico(Tecnico.TecnicosId, Tecnico.Nombres!))
+            if (await tecnicosService.ExisteTecnico(Tecnico.TecnicoId, Tecnico.Nombres!))
             {
 
                 return;
@@ -101,7 +101,7 @@
             var confirmado = await jsRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de eliminar este técnico?");
             if (!confirmado) return;
 
-            var eliminado = await tecnicosService.Eliminar(Tecnico.TecnicosId);
+            var eliminado = await tecnicosService.Eliminar(Tecnico.TecnicoId);
 
             if (eliminado)
             {
