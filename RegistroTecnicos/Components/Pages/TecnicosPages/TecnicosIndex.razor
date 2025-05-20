@@ -14,12 +14,14 @@
 
 <div class="container">
     <div class="card shadow-lg">
+        @*Header*@
         <div class="card-header d-flex justify-content-between align-items-center position-relative">
             <h5 class="card-title mb-0 text-center w-100">Consulta de T&eacute;cnicos</h5>
             <a href="/Tecnico/Create" class="btn btn-success position-absolute end-0 me-3">
                 <span class="bi bi-plus-circle"></span> Crear
             </a>
         </div>
+        @*Body*@
         <div class="card-body">
             <div class="row mb-2">
                 <div class="col-3">
@@ -77,6 +79,7 @@
                 </tbody>
             </table>
         </div>
+        @*Footer*@
         <div class="card-footer d-flex justify-content-between">
             <label>Cantidad: @(ListaTecnicos?.Count ?? 0)</label>
         </div>
