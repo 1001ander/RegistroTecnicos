@@ -6,7 +6,7 @@ namespace RegistroTecnicos.Models;
 public class Tecnicos
 {
     [Key]
-    public int TecnicosId { get; set; }
+    public int TecnicoId { get; set; }
 
     [Required(ErrorMessage = "El nombre es requerido")]
     [StringLength(100, MinimumLength = 1, ErrorMessage = "Debe tener al menos un carácter")]
