@@ -1,0 +1,167 @@
+﻿@page "/Cliente/Edit/{ClienteId:int}"
+@using RegistroTecnicos.Models
+@using RegistroTecnicos.Services
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject ClientesService clientesService
+@inject TecnicosService tecnicosService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Editar Cliente</PageTitle>
+
+<EditForm Model="Cliente" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title">Editar Cliente</h5>
+            </div>
+
+            <div class="card-body">
+                @*Nombres*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombres</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Nombres" />
+                    <ValidationMessage For="@(() => Cliente.Nombres)" />
+                </div>
+
+                @*FechaIngreso*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha de Ingreso</strong></label>
+                    <InputDate class="form-control" @bind-Value="Cliente.FechaIngreso" />
+                    <ValidationMessage For="@(() => Cliente.FechaIngreso)" />
+                </div>
+
+                @*Direccion*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Dirección</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Direccion" />
+                    <ValidationMessage For="@(() => Cliente.Direccion)" />
+                </div>
+
+                @*RNC*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>RNC</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Rnc" />
+                    <ValidationMessage For="@(() => Cliente.Rnc)" />
+                </div>
+
+                @*Limite Credito*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Límite de Crédito</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Cliente.LimiteCredito" />
+                    <ValidationMessage For="@(() => Cliente.LimiteCredito)" />
+                </div>
+
+                @*Tecnico Asignado*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico Asignado</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Cliente.TecnicoId">
+                        <option value="0" selected disabled>Seleccione un técnico</option>
+                        @foreach (var tecnico in Tecnicos)
+                        {
+                            <option value="@tecnico.TecnicoId">@tecnico.Nombres</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Cliente.TecnicoId)" />
+                </div>
+            </div>
+            @*Footer*@
+            <div class="card-footer text-center">
+                <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" @onclick="Eliminar">
+                    <i class="bi bi-arrow-lef"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int ClienteId { get; set; }
+
+    public Clientes Cliente { get; set; } = new Clientes();
+    public List<Tecnicos> Tecnicos { get; set; } = new List<Tecnicos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Cliente = await clientesService.Buscar(ClienteId) ?? new Clientes();
+            Tecnicos = await tecnicosService.Listar(t => t.TecnicoId > 0) ?? new List<Tecnicos>();
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al cargar datos: {ex.Message}");
+        }
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Clientes/Index");
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            if (await clientesService.ExisteCliente(Cliente.ClienteId, Cliente.Nombres!))
+            {
+                toastService.ShowWarning("Ya existe un cliente con este nombre");
+                return;
+            }
+
+            var resultado = await clientesService.Guardar(Cliente);
+
+            if (resultado)
+            {
+                toastService.ShowSuccess("Cliente actualizado correctamente");
+                navigationManager.NavigateTo("/Clientes/Index");
+            }
+            else
+            {
+                toastService.ShowError("No se pudo actualizar el cliente");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al guardar: {ex.Message}");
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        try
+        {
+            var confirmado = await jsRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de eliminar este cliente?");
+            if (!confirmado) return;
+
+            var eliminado = await clientesService.Eliminar(Cliente.ClienteId);
+
+            if (eliminado)
+            {
+                toastService.ShowSuccess("Cliente eliminado correctamente");
+                navigationManager.NavigateTo("/Clientes/Index");
+            }
+            else
+            {
+                toastService.ShowError("No se pudo eliminar el cliente");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al eliminar: {ex.Message}");
+        }
+    }
+}
