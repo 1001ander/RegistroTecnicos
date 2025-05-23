@@ -20,6 +20,9 @@ builder.Services.AddBlazorBootstrap();
 //Inyeccion del service
 builder.Services.AddScoped<TecnicosService>();
 
+//Inyeccion del service de cliente 
+builder.Services.AddScoped<ClientesService>();
+
 
 
 
