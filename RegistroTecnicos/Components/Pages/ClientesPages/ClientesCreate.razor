@@ -1,0 +1,151 @@
+﻿@page "/Clientes/Create"
+@using RegistroTecnicos.Models
+@using RegistroTecnicos.Services
+@using Blazored.Toast.Services
+@using System.ComponentModel.DataAnnotations
+@inject ClientesService ClientesService
+@inject TecnicosService TecnicosService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Cliente</PageTitle>
+
+<EditForm Model="Cliente" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title">Nuevo Cliente</h5>
+            </div>
+
+            <div class="card-body">
+                @*Nombres*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombres</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Nombres" />
+                    <ValidationMessage For="@(() => Cliente.Nombres)" />
+                </div>
+
+                @*FechaIngreso*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha de Ingreso</strong></label>
+                    <InputDate class="form-control" @bind-Value="Cliente.FechaIngreso" />
+                    <ValidationMessage For="@(() => Cliente.FechaIngreso)" />
+                </div>
+
+                @*Direccion*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Dirección</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Direccion" />
+                    <ValidationMessage For="@(() => Cliente.Direccion)" />
+                </div>
+
+                @*Rnc*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>RNC</strong></label>
+                    <InputText class="form-control" @bind-Value="Cliente.Rnc" />
+                    <ValidationMessage For="@(() => Cliente.Rnc)" />
+                </div>
+
+                @*LimiteCredito*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Límite de Crédito</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Cliente.LimiteCredito" />
+                    <ValidationMessage For="@(() => Cliente.LimiteCredito)" />
+                </div>
+
+                @*TecnicoId*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico Asignado</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Cliente.TecnicoId">
+                        <option value="0" selected disabled>Seleccione un técnico</option>
+                        @foreach (var tecnico in Tecnicos)
+                        {
+                            <option value="@tecnico.TecnicoId">@tecnico.Nombres</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Cliente.TecnicoId)" />
+                </div>
+            </div>
+            @*Footer*@
+            <div class="card-footer text-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    <button type="submit" class="btn btn-outline-success me-2">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" @onclick="LimpiarFormulario">
+                        <i class="bi bi-eraser"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Clientes Cliente { get; set; } = new();
+    private List<Tecnicos> Tecnicos { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var tecnicos = await TecnicosService.Listar(t => t.TecnicoId > 0);
+            Tecnicos = tecnicos ?? new List<Tecnicos>();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al cargar técnicos: {ex.Message}");
+        }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(Cliente.Nombres))
+            {
+                ToastService.ShowWarning("El nombre del cliente es requerido");
+                return;
+            }
+
+            if (await ClientesService.ExisteCliente(0, Cliente.Nombres))
+            {
+                ToastService.ShowWarning("Ya existe un cliente con este nombre");
+                return;
+            }
+
+            var resultado = await ClientesService.Guardar(Cliente);
+
+            if (resultado)
+            {
+                ToastService.ShowSuccess("Cliente registrado exitosamente");
+                await Task.Delay(1500);
+                NavigationManager.NavigateTo("/Clientes/Index");
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo registrar el cliente");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al guardar: {ex.Message}");
+        }
+    }
+
+    private void Volver()
+    {
+        NavigationManager.NavigateTo("/Clientes/Index");
+    }
+
+    private void LimpiarFormulario()
+    {
+        Cliente = new Clientes();
+        Cliente.TecnicoId = 0;
+    }
+}

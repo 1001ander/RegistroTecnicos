@@ -11,6 +11,7 @@ builder.Services.AddBlazoredToast();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 //Inyeccion del contexto
 builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -19,6 +20,9 @@ builder.Services.AddBlazorBootstrap();
 
 //Inyeccion del service
 builder.Services.AddScoped<TecnicosService>();
+
+//Inyeccion del service de cliente 
+builder.Services.AddScoped<ClientesService>();
 
 
 

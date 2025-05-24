@@ -1,4 +1,4 @@
-﻿@page "/Tecnico/Create"
+﻿@page "/Tecnicos/Create"
 @using RegistroTecnicos.Models
 @using RegistroTecnicos.Services
 @using Blazored.Toast.Services
@@ -17,6 +17,9 @@
             </div>
 
             <div class="card-body">
+                @*Id tecnico*@ 
+            <label class="form-label" for="id"><strong>T&eacute;cnico ID</strong></label>
+                <InputNumber id="TecnicoId" class="form-control" @bind-Value="tecnicos.TecnicoId" readonly></InputNumber>
                 @*Nombres*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Nombres</strong></label>
