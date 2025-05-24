@@ -56,7 +56,7 @@ public class ClientesService(IDbContextFactory<Contexto> DbFactory)
     public async Task<List<Clientes>> Listar(Expression<Func<Clientes, bool>> criterio)
     {
         await using var contexto = await DbFactory.CreateDbContextAsync();
-        return await contexto.Clientes.Include(t => t.Tecnicos)
+        return await contexto.Clientes.Include(t => t.Tecnico)
             .Where(criterio)
             .ToListAsync();
     }
