@@ -49,12 +49,15 @@ namespace RegistroTecnicos.Migrations
                         .HasMaxLength(11)
                         .HasColumnType("character varying(11)");
 
-                    b.Property<int>("TecnicosId")
+                    b.Property<int>("TecnicoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TecnicosTecnicoId")
                         .HasColumnType("integer");
 
                     b.HasKey("ClienteId");
 
-                    b.HasIndex("TecnicosId");
+                    b.HasIndex("TecnicosTecnicoId");
 
                     b.ToTable("Clientes");
                 });
@@ -84,9 +87,7 @@ namespace RegistroTecnicos.Migrations
                 {
                     b.HasOne("RegistroTecnicos.Models.Tecnicos", "Tecnicos")
                         .WithMany()
-                        .HasForeignKey("TecnicosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TecnicosTecnicoId");
 
                     b.Navigation("Tecnicos");
                 });

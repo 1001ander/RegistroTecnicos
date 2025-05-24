@@ -12,8 +12,8 @@ using RegistroTecnicos.DAL;
 namespace RegistroTecnicos.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20250523013100_RenameTecnicosIdToTecnicoId")]
-    partial class RenameTecnicosIdToTecnicoId
+    [Migration("20250524004705_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,12 +52,15 @@ namespace RegistroTecnicos.Migrations
                         .HasMaxLength(11)
                         .HasColumnType("character varying(11)");
 
-                    b.Property<int>("TecnicosId")
+                    b.Property<int>("TecnicoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TecnicosTecnicoId")
                         .HasColumnType("integer");
 
                     b.HasKey("ClienteId");
 
-                    b.HasIndex("TecnicosId");
+                    b.HasIndex("TecnicosTecnicoId");
 
                     b.ToTable("Clientes");
                 });
@@ -87,9 +90,7 @@ namespace RegistroTecnicos.Migrations
                 {
                     b.HasOne("RegistroTecnicos.Models.Tecnicos", "Tecnicos")
                         .WithMany()
-                        .HasForeignKey("TecnicosId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TecnicosTecnicoId");
 
                     b.Navigation("Tecnicos");
                 });

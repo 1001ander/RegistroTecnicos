@@ -7,11 +7,25 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RegistroTecnicos.Migrations
 {
     /// <inheritdoc />
-    public partial class AgregarTablaClientes : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Tecnicos",
+                columns: table => new
+                {
+                    TecnicoId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombres = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    SueldoHora = table.Column<decimal>(type: "numeric", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tecnicos", x => x.TecnicoId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Clientes",
                 columns: table => new
@@ -23,23 +37,23 @@ namespace RegistroTecnicos.Migrations
                     Direccion = table.Column<string>(type: "text", nullable: false),
                     Rnc = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
                     LimiteCredito = table.Column<decimal>(type: "numeric", nullable: false),
-                    TecnicosId = table.Column<int>(type: "integer", nullable: false)
+                    TecnicoId = table.Column<int>(type: "integer", nullable: false),
+                    TecnicosTecnicoId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clientes", x => x.ClienteId);
                     table.ForeignKey(
-                        name: "FK_Clientes_Tecnicos_TecnicosId",
-                        column: x => x.TecnicosId,
+                        name: "FK_Clientes_Tecnicos_TecnicosTecnicoId",
+                        column: x => x.TecnicosTecnicoId,
                         principalTable: "Tecnicos",
-                        principalColumn: "TecnicoId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "TecnicoId");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clientes_TecnicosId",
+                name: "IX_Clientes_TecnicosTecnicoId",
                 table: "Clientes",
-                column: "TecnicosId");
+                column: "TecnicosTecnicoId");
         }
 
         /// <inheritdoc />
@@ -47,6 +61,9 @@ namespace RegistroTecnicos.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Clientes");
+
+            migrationBuilder.DropTable(
+                name: "Tecnicos");
         }
     }
 }
