@@ -1,4 +1,4 @@
-﻿@page "/Cliente/Create"
+﻿@page "/Clientes/Create"
 @using RegistroTecnicos.Models
 @using RegistroTecnicos.Services
 @using Blazored.Toast.Services
@@ -11,7 +11,7 @@
 
 <PageTitle>Registrar Cliente</PageTitle>
 
-<EditForm Model="@Cliente" OnValidSubmit="@Guardar">
+<EditForm Model="Cliente" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
     <div class="container">
         <div class="card shadow-lg">
