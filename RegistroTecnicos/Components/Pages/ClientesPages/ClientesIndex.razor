@@ -88,9 +88,9 @@
                                     <td>@cliente.Direccion</td>
                                     <td>@cliente.Rnc</td>
                                     <td>@cliente.LimiteCredito?.ToString("C")</td>
-                                    <td>@(cliente.Tecnicos?.Nombres ?? "Sin asignar")</td>
+                                    <td>@(cliente.Tecnico?.Nombres ?? "Sin asignar")</td>
                                     <td>
-                                        <a href="/Cliente/Edit/@cliente.ClienteId"
+                                        <a href="/Clientes/Edit/@cliente.ClienteId"
                                            class="btn btn-outline-primary bi bi-pencil-square"
                                            title="Editar cliente">
                                         </a>
