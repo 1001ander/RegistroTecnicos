@@ -28,6 +28,8 @@ builder.Services.AddScoped<ClientesService>();
 
 
 
+
+
 var app = builder.Build();
 
 
