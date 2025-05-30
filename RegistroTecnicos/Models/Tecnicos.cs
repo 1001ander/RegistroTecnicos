@@ -2,7 +2,7 @@
 using System.IO.Compression;
 
 namespace RegistroTecnicos.Models;
-
+    
 public class Tecnicos
 {
     [Key]
