@@ -35,7 +35,7 @@ namespace RegistroTecnicos.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("FechaIngreso")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("LimiteCredito")
                         .HasColumnType("numeric");
@@ -52,12 +52,9 @@ namespace RegistroTecnicos.Migrations
                     b.Property<int>("TecnicoId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("TecnicosTecnicoId")
-                        .HasColumnType("integer");
-
                     b.HasKey("ClienteId");
 
-                    b.HasIndex("TecnicosTecnicoId");
+                    b.HasIndex("TecnicoId");
 
                     b.ToTable("Clientes");
                 });
@@ -83,13 +80,52 @@ namespace RegistroTecnicos.Migrations
                     b.ToTable("Tecnicos");
                 });
 
+            modelBuilder.Entity("RegistroTecnicos.Models.Tickets", b =>
+                {
+                    b.Property<int>("TicketId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TicketId"));
+
+                    b.Property<string>("Asunto")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Prioridad")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TecnicoId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("TiempoInvertido")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("TicketId");
+
+                    b.ToTable("Tickets");
+                });
+
             modelBuilder.Entity("RegistroTecnicos.Models.Clientes", b =>
                 {
-                    b.HasOne("RegistroTecnicos.Models.Tecnicos", "Tecnicos")
+                    b.HasOne("RegistroTecnicos.Models.Tecnicos", "Tecnico")
                         .WithMany()
-                        .HasForeignKey("TecnicosTecnicoId");
+                        .HasForeignKey("TecnicoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Tecnicos");
+                    b.Navigation("Tecnico");
                 });
 #pragma warning restore 612, 618
         }
