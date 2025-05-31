@@ -22,7 +22,7 @@
         </div>
 
         <div class="card-body">
-             @*Body*@
+            @*Filtro*@
             <div class="row">
                 <div class="col-3">
                     <label class="col-form-label"><strong>Filtrar por</strong></label>
@@ -35,7 +35,6 @@
                 </div>
             </div>
 
-            @*Segunda fila de Filtros*@
             <div class="row align-items-center mb-3">
                 <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
@@ -45,8 +44,10 @@
                         <option value="Cliente">Cliente</option>
                         <option value="Tecnico">Técnico</option>
                         <option value="Prioridad">Prioridad</option>
+                        <option value="Descripcion">Descripción</option>
                     </InputSelect>
                 </div>
+
                 <div class="col-4">
                     <div class="input-group">
                         <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
@@ -57,35 +58,34 @@
                 </div>
             </div>
 
-            @*Tercera fila para filtro de fechas*@
             <div class="row align-items-center mb-3">
                 <div class="col-3">
                     <label class="col-form-label"><strong>Rango de Fechas</strong></label>
                 </div>
                 <div class="col-9">
-                    <div class="input-group">
-                        <input type="date" class="form-control" @bind="FechaDesde" />
-                        <span class="input-group-text">a</span>
-                        <input type="date" class="form-control" @bind="FechaHasta" />
-                        <button type="button" class="btn btn-info" @onclick="FiltrarPorFecha">
-                            <i class="bi bi-filter"></i> Filtrar
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="date" class="form-control flex-grow-0" style="width: 140px;" @bind="FechaDesde" />
+                        <span class="text-muted">a</span>
+                        <input type="date" class="form-control flex-grow-0" style="width: 140px;" @bind="FechaHasta" />
+                        <button type="button" class="btn btn-info ms-2" @onclick="FiltrarPorFecha">
+                            <i class="bi bi-filter"></i> Aplicar
                         </button>
                     </div>
                 </div>
             </div>
-
             @*Tabla*@
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table table-striped text-black">
                         <tr>
-                            <th>TicketId</th>
+                            <th>ID</th>
                             <th>Fecha</th>
                             <th>Asunto</th>
+                            <th>Descripción</th>
                             <th>Prioridad</th>
                             <th>Cliente</th>
                             <th>Técnico</th>
-                            <th>Tiempo (hrs)</th>
+                            <th>Tiempo</th>
                             <th>Editar</th>
                         </tr>
                     </thead>
@@ -96,12 +96,18 @@
                             {
                                 <tr>
                                     <td>@ticket.TicketId</td>
-                                    <td>@ticket.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@ticket.Fecha.ToString("dd/MM/yyyy")</td>
                                     <td>@ticket.Asunto</td>
+                                    <td>
+                                        <div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                             title="@ticket.Descripcion">
+                                            @ticket.Descripcion
+                                        </div>
+                                    </td>
                                     <td>@ticket.Prioridad</td>
                                     <td>@ticket.Cliente?.Nombres</td>
                                     <td>@ticket.Tecnico?.Nombres</td>
-                                    <td>@ticket.TiempoInvertido.ToString("N2")</td>
+                                    <td>@ticket.TiempoInvertido.ToString("N1")h</td>
                                     <td>
                                         <a href="/Tickets/Edit/@ticket.TicketId"
                                            class="btn btn-outline-primary bi bi-pencil-square"
@@ -114,7 +120,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center">No se encontraron tickets</td>
+                                <td colspan="9" class="text-center">No se encontraron tickets</td>
                             </tr>
                         }
                     </tbody>
@@ -168,6 +174,7 @@
                 "Cliente" => t => t.Cliente.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
                 "Tecnico" => t => t.Tecnico.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
                 "Prioridad" => t => t.Prioridad.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Descripcion" => t => t.Descripcion.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
                 _ => t => true
             };
 
