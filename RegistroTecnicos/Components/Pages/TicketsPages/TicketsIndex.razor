@@ -8,8 +8,6 @@
 @using Blazored.Toast.Services
 
 @inject TicketsService TicketsService
-@inject ClientesService ClientesService
-@inject TecnicosService TecnicosService
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 
@@ -24,13 +22,11 @@
         </div>
 
         <div class="card-body">
-            @*Labels*@
+            @*Filtro*@
             <div class="row">
-                @*Filtrar por*@
                 <div class="col-3">
                     <label class="col-form-label"><strong>Filtrar por</strong></label>
                 </div>
-                @*ValorFiltro*@
                 <div class="col-4">
                     <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
                 </div>
@@ -38,7 +34,8 @@
                     <a href="/Tickets/Create" class="btn btn-success bi bi-plus-circle"> Crear</a>
                 </div>
             </div>
-            @*filtro*@
+
+            @*Primera fila de filtros*@
             <div class="row align-items-center mb-3">
                 <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
@@ -51,12 +48,28 @@
                     </InputSelect>
                 </div>
 
-                @*Busqueda*@
                 <div class="col-4">
                     <div class="input-group">
                         <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
                         <button type="button" class="btn btn-primary" @onclick="Buscar">
                             <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @*Segunda fila para filtro por fechas*@
+            <div class="row align-items-center mb-3">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Rango de Fechas</strong></label>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input type="date" class="form-control" @bind="FechaDesde" />
+                        <span class="input-group-text">a</span>
+                        <input type="date" class="form-control" @bind="FechaHasta" />
+                        <button type="button" class="btn btn-info" @onclick="FiltrarPorFecha">
+                            <i class="bi bi-filter"></i>
                         </button>
                     </div>
                 </div>
@@ -84,7 +97,7 @@
                             {
                                 <tr>
                                     <td>@ticket.TicketId</td>
-                                    <td>@ticket.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>@ticket.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>@ticket.Asunto</td>
                                     <td>@ticket.Prioridad</td>
                                     <td>@ticket.Cliente?.Nombres</td>
@@ -109,7 +122,6 @@
                 </table>
             </div>
         </div>
-        @*Footer*@
         <div class="card-footer space-between">
             <label>Cantidad de tickets: @(ListaTickets?.Count() ?? 0)</label>
         </div>
@@ -118,64 +130,73 @@
 
 @code {
     private List<Tickets> ListaTickets { get; set; } = new();
-    private List<Clientes> ListaClientes { get; set; } = new();
-    private List<Tecnicos> ListaTecnicos { get; set; } = new();
     private string Filtro { get; set; } = string.Empty;
     private string ValorFiltro { get; set; } = string.Empty;
+    private DateTime? FechaDesde { get; set; }
+    private DateTime? FechaHasta { get; set; }
 
     protected override async Task OnInitializedAsync()
+    {
+        await CargarTickets();
+    }
+
+    private async Task CargarTickets()
     {
         try
         {
             ListaTickets = await TicketsService.ListarTodos();
-            ListaClientes = await ClientesService.Listar(c => c.ClienteId > 0);
-            ListaTecnicos = await TecnicosService.Listar(t => t.TecnicoId > 0);
-            ToastService.ShowSuccess("Datos cargados correctamente");
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Error al cargar datos: {ex.Message}");
+            ToastService.ShowError($"Error al cargar tickets: {ex.Message}");
         }
     }
 
     private async Task Buscar()
     {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarTickets();
+            return;
+        }
+
         try
         {
-            if (string.IsNullOrWhiteSpace(ValorFiltro))
+            Expression<Func<Tickets, bool>> criterio = Filtro switch
             {
-                ListaTickets = await TicketsService.ListarTodos();
-                return;
-            }
+                "Id" when int.TryParse(ValorFiltro, out int ticketId) => t => t.TicketId == ticketId,
+                "Asunto" => t => t.Asunto.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Cliente" => t => t.Cliente.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Tecnico" => t => t.Tecnico.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Prioridad" => t => t.Prioridad.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                _ => t => true
+            };
 
-            if (Filtro == "Id" && int.TryParse(ValorFiltro, out int ticketId))
-            {
-                ListaTickets = await TicketsService.Listar(t => t.TicketId == ticketId);
-            }
-            else if (Filtro == "Asunto")
-            {
-                ListaTickets = await TicketsService.Listar(t =>
-                    t.Asunto.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase));
-            }
-            else if (Filtro == "Cliente")
-            {
-                ListaTickets = await TicketsService.Listar(t =>
-                    t.Cliente.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase));
-            }
-            else if (Filtro == "Tecnico")
-            {
-                ListaTickets = await TicketsService.Listar(t =>
-                    t.Tecnico.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase));
-            }
-            else if (Filtro == "Prioridad")
-            {
-                ListaTickets = await TicketsService.Listar(t =>
-                    t.Prioridad.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase));
-            }
+            ListaTickets = await TicketsService.Listar(criterio);
         }
         catch (Exception ex)
         {
             ToastService.ShowError($"Error al buscar: {ex.Message}");
+        }
+    }
+
+    private async Task FiltrarPorFecha()
+    {
+        try
+        {
+            if (FechaDesde.HasValue && FechaHasta.HasValue)
+            {
+                ListaTickets = await TicketsService.FiltrarPorFecha(FechaDesde.Value, FechaHasta.Value);
+                ToastService.ShowSuccess($"Mostrando tickets del {FechaDesde.Value.ToShortDateString()} al {FechaHasta.Value.ToShortDateString()}");
+            }
+            else
+            {
+                ToastService.ShowWarning("Debe seleccionar ambas fechas para filtrar");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al filtrar por fecha: {ex.Message}");
         }
     }
 }
