@@ -1,0 +1,208 @@
+﻿@page "/Tickets/Index"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Linq.Expressions
+@using RegistroTecnicos.DAL
+@using RegistroTecnicos.Services
+@using RegistroTecnicos.Models
+@using BlazorBootstrap
+@using Blazored.Toast.Services
+
+@inject TicketsService TicketsService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+@rendermode InteractiveServer
+
+<PageTitle>Registro de Tickets</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center position-relative">
+            <h5 class="card-title mb-0 text-center w-100">Registro de Tickets</h5>
+        </div>
+
+        <div class="card-body">
+            @*Filtro*@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                </div>
+                <div class="col-md-5 d-flex align-items-end justify-content-end aling-items-end mt-3 mt-md-0">
+                    <a href="/Tickets/Create" class="btn btn-success bi bi-plus-circle"> Crear</a>
+                </div>
+            </div>
+
+            <div class="row align-items-center mb-3">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opción</option>
+                        <option value="Id">Id</option>
+                        <option value="Asunto">Asunto</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="Tecnico">Técnico</option>
+                        <option value="Prioridad">Prioridad</option>
+                        <option value="Descripcion">Descripción</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-primary" @onclick="Buscar">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row align-items-center mb-3">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Rango de Fechas</strong></label>
+                </div>
+                <div class="col-9">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="date" class="form-control flex-grow-0" style="width: 140px;" @bind="FechaDesde" />
+                        <span class="text-muted">a</span>
+                        <input type="date" class="form-control flex-grow-0" style="width: 140px;" @bind="FechaHasta" />
+                        <button type="button" class="btn btn-info ms-2" @onclick="FiltrarPorFecha">
+                            <i class="bi bi-filter"></i> Aplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @*Tabla*@
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table table-striped text-black">
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Asunto</th>
+                            <th>Descripción</th>
+                            <th>Prioridad</th>
+                            <th>Cliente</th>
+                            <th>Técnico</th>
+                            <th>Tiempo</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ListaTickets != null && ListaTickets.Any())
+                        {
+                            @foreach (var ticket in ListaTickets)
+                            {
+                                <tr>
+                                    <td>@ticket.TicketId</td>
+                                    <td>@ticket.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>@ticket.Asunto</td>
+                                    <td>
+                                        <div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                             title="@ticket.Descripcion">
+                                            @ticket.Descripcion
+                                        </div>
+                                    </td>
+                                    <td>@ticket.Prioridad</td>
+                                    <td>@ticket.Cliente?.Nombres</td>
+                                    <td>@ticket.Tecnico?.Nombres</td>
+                                    <td>@ticket.TiempoInvertido.ToString("N1")h</td>
+                                    <td>
+                                        <a href="/Tickets/Edit/@ticket.TicketId"
+                                           class="btn btn-outline-primary bi bi-pencil-square"
+                                           title="Editar ticket">
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center">No se encontraron tickets</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer space-between">
+            <label>Cantidad de tickets: @(ListaTickets?.Count() ?? 0)</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Tickets> ListaTickets { get; set; } = new();
+    private string Filtro { get; set; } = string.Empty;
+    private string ValorFiltro { get; set; } = string.Empty;
+    private DateTime? FechaDesde { get; set; }
+    private DateTime? FechaHasta { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarTickets();
+    }
+
+    private async Task CargarTickets()
+    {
+        try
+        {
+            ListaTickets = await TicketsService.ListarTodos();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al cargar tickets: {ex.Message}");
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarTickets();
+            return;
+        }
+
+        try
+        {
+            Expression<Func<Tickets, bool>> criterio = Filtro switch
+            {
+                "Id" when int.TryParse(ValorFiltro, out int ticketId) => t => t.TicketId == ticketId,
+                "Asunto" => t => t.Asunto.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Cliente" => t => t.Cliente.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Tecnico" => t => t.Tecnico.Nombres.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Prioridad" => t => t.Prioridad.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Descripcion" => t => t.Descripcion.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                _ => t => true
+            };
+
+            ListaTickets = await TicketsService.Listar(criterio);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al buscar: {ex.Message}");
+        }
+    }
+
+    private async Task FiltrarPorFecha()
+    {
+        try
+        {
+            if (FechaDesde.HasValue && FechaHasta.HasValue)
+            {
+                ListaTickets = await TicketsService.FiltrarPorFecha(FechaDesde.Value, FechaHasta.Value);
+                ToastService.ShowSuccess($"Mostrando tickets del {FechaDesde.Value.ToShortDateString()} al {FechaHasta.Value.ToShortDateString()}");
+            }
+            else
+            {
+                ToastService.ShowWarning("Debe seleccionar ambas fechas para filtrar");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al filtrar por fecha: {ex.Message}");
+        }
+    }
+}

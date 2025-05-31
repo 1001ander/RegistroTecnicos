@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RegistroTecnicos.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,33 +27,52 @@ namespace RegistroTecnicos.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tickets",
+                columns: table => new
+                {
+                    TicketId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Fecha = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    ClienteId = table.Column<int>(type: "integer", nullable: false),
+                    TecnicoId = table.Column<int>(type: "integer", nullable: false),
+                    Prioridad = table.Column<string>(type: "text", nullable: false),
+                    Asunto = table.Column<string>(type: "text", nullable: false),
+                    Descripcion = table.Column<string>(type: "text", nullable: false),
+                    TiempoInvertido = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tickets", x => x.TicketId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Clientes",
                 columns: table => new
                 {
                     ClienteId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    FechaIngreso = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaIngreso = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Nombres = table.Column<string>(type: "text", nullable: false),
                     Direccion = table.Column<string>(type: "text", nullable: false),
                     Rnc = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
                     LimiteCredito = table.Column<decimal>(type: "numeric", nullable: false),
-                    TecnicoId = table.Column<int>(type: "integer", nullable: false),
-                    TecnicosTecnicoId = table.Column<int>(type: "integer", nullable: true)
+                    TecnicoId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clientes", x => x.ClienteId);
                     table.ForeignKey(
-                        name: "FK_Clientes_Tecnicos_TecnicosTecnicoId",
-                        column: x => x.TecnicosTecnicoId,
+                        name: "FK_Clientes_Tecnicos_TecnicoId",
+                        column: x => x.TecnicoId,
                         principalTable: "Tecnicos",
-                        principalColumn: "TecnicoId");
+                        principalColumn: "TecnicoId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clientes_TecnicosTecnicoId",
+                name: "IX_Clientes_TecnicoId",
                 table: "Clientes",
-                column: "TecnicosTecnicoId");
+                column: "TecnicoId");
         }
 
         /// <inheritdoc />
@@ -61,6 +80,9 @@ namespace RegistroTecnicos.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Clientes");
+
+            migrationBuilder.DropTable(
+                name: "Tickets");
 
             migrationBuilder.DropTable(
                 name: "Tecnicos");

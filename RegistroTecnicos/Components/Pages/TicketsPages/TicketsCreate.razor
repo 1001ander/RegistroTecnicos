@@ -1,0 +1,188 @@
+﻿@page "/Tickets/Create"
+@using RegistroTecnicos.Models
+@using RegistroTecnicos.Services
+@using Blazored.Toast.Services
+@inject TicketsService TicketsService
+@inject ClientesService ClientesService
+@inject TecnicosService TecnicosService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Ticket</PageTitle>
+
+<EditForm Model="Ticket" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title">Nuevo Ticket</h5>
+            </div>
+
+            <div class="card-body">
+                @*Fecha*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Ticket.Fecha" />
+                    <ValidationMessage For="@(() => Ticket.Fecha)" />
+                </div>
+
+                @*Cliente*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Cliente</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Ticket.ClienteId">
+                        <option value="0" selected disabled>Seleccione un cliente</option>
+                        @foreach (var cliente in ListaClientes)
+                        {
+                            <option value="@cliente.ClienteId">@cliente.Nombres</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Ticket.ClienteId)" />
+                </div>
+
+                @*Técnico*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Técnico Asignado</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Ticket.TecnicoId">
+                        <option value="0" selected disabled>Seleccione un técnico</option>
+                        @foreach (var tecnico in ListaTecnicos)
+                        {
+                            <option value="@tecnico.TecnicoId">@tecnico.Nombres</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Ticket.TecnicoId)" />
+                </div>
+
+                @*Prioridad*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Prioridad</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Ticket.Prioridad">
+                        <option value="Alta">Alta</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Baja">Baja</option>
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Ticket.Prioridad)" />
+                </div>
+
+                @*Asunto*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Asunto</strong></label>
+                    <InputText class="form-control" @bind-Value="Ticket.Asunto" />
+                    <ValidationMessage For="@(() => Ticket.Asunto)" />
+                </div>
+
+                @*Descripción*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripción</strong></label>
+                    <InputTextArea class="form-control" @bind-Value="Ticket.Descripcion" rows="4" />
+                    <ValidationMessage For="@(() => Ticket.Descripcion)" />
+                </div>
+
+                @*Tiempo Invertido*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Tiempo Invertido (horas)</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Ticket.TiempoInvertido" />
+                    <ValidationMessage For="@(() => Ticket.TiempoInvertido)" />
+                </div>
+            </div>
+
+            @*Footer*@
+            <div class="card-footer text-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </button>
+                    <button type="submit" class="btn btn-outline-success me-2">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" @onclick="LimpiarFormulario">
+                        <i class="bi bi-eraser"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Tickets Ticket { get; set; } = new Tickets();
+    private List<Clientes> ListaClientes { get; set; } = new();
+    private List<Tecnicos> ListaTecnicos { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+           
+            Ticket.Fecha = DateTime.Now;
+
+           
+            ListaClientes = await ClientesService.Listar(c => c.ClienteId > 0);
+            ListaTecnicos = await TecnicosService.Listar(t => t.TecnicoId > 0);
+
+            
+            Ticket.Prioridad = "Media";
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al inicializar: {ex.Message}");
+        }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            
+            if (string.IsNullOrWhiteSpace(Ticket.Asunto))
+            {
+                ToastService.ShowWarning("El asunto del ticket es requerido");
+                return;
+            }
+
+            if (Ticket.ClienteId == 0)
+            {
+                ToastService.ShowWarning("Debe seleccionar un cliente");
+                return;
+            }
+
+            if (Ticket.TecnicoId == 0)
+            {
+                ToastService.ShowWarning("Debe seleccionar un técnico");
+                return;
+            }
+
+           
+            var resultado = await TicketsService.Guardar(Ticket);
+
+            if (resultado)
+            {
+                ToastService.ShowSuccess("Ticket registrado exitosamente");
+                await Task.Delay(1500);
+                NavigationManager.NavigateTo("/Tickets/Index");
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo registrar el ticket");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al guardar: {ex.Message}");
+        }
+    }
+
+    private void Volver()
+    {
+        NavigationManager.NavigateTo("/Tickets/Index");
+    }
+
+    private void LimpiarFormulario()
+    {
+        Ticket = new Tickets
+            {
+                Fecha = DateTime.Now,
+                Prioridad = "Media"
+            };
+    }
+}

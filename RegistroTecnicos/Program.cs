@@ -24,6 +24,11 @@ builder.Services.AddScoped<TecnicosService>();
 //Inyeccion del service de cliente 
 builder.Services.AddScoped<ClientesService>();
 
+//Inyeccion del service de tickets
+builder.Services.AddScoped<TicketsService>();
+
+
+
 
 
 
