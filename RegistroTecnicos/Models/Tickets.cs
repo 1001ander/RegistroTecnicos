@@ -9,7 +9,7 @@ public class Tickets
     public int TicketId { get; set; }
     [DataType(DataType.DateTime)]
     [Display(Name = "Fecha de Creación")]
-    [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}")]
+   
     public DateTime Fecha { get; set; } = DateTime.Now;
     [Required(ErrorMessage = "El cliente es requerido")]
     [Display(Name = "Cliente")]
