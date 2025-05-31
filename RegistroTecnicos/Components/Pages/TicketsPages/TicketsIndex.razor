@@ -22,7 +22,7 @@
         </div>
 
         <div class="card-body">
-            @*Filtro*@
+             @*Body*@
             <div class="row">
                 <div class="col-3">
                     <label class="col-form-label"><strong>Filtrar por</strong></label>
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            @*Primera fila de filtros*@
+            @*Segunda fila de Filtros*@
             <div class="row align-items-center mb-3">
                 <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
@@ -47,7 +47,6 @@
                         <option value="Prioridad">Prioridad</option>
                     </InputSelect>
                 </div>
-
                 <div class="col-4">
                     <div class="input-group">
                         <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
@@ -58,18 +57,18 @@
                 </div>
             </div>
 
-            @*Segunda fila para filtro por fechas*@
+            @*Tercera fila para filtro de fechas*@
             <div class="row align-items-center mb-3">
                 <div class="col-3">
                     <label class="col-form-label"><strong>Rango de Fechas</strong></label>
                 </div>
-                <div class="col-4">
+                <div class="col-9">
                     <div class="input-group">
                         <input type="date" class="form-control" @bind="FechaDesde" />
                         <span class="input-group-text">a</span>
                         <input type="date" class="form-control" @bind="FechaHasta" />
                         <button type="button" class="btn btn-info" @onclick="FiltrarPorFecha">
-                            <i class="bi bi-filter"></i>
+                            <i class="bi bi-filter"></i> Filtrar
                         </button>
                     </div>
                 </div>
