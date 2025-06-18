@@ -2,34 +2,38 @@
 @using RegistroTecnicos.Models
 @using RegistroTecnicos.Services
 @using Blazored.Toast.Services
-
 @inject SistemasService SistemasService
-@inject NavigationManager NavigationManager
 @inject IToastService ToastService
-
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
 <PageTitle>Registrar Sistema</PageTitle>
 
 <EditForm Model="Sistema" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    @* Se eliminó el ValidationSummary *@
 
-    <div class="container">
-        <div class="card shadow-lg">
-            <div class="card-header text-center bg-primary text-white">
-                <h5 class="card-title">Nuevo Sistema</h5>
+    <div class="container mt-3">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h5>Nuevo Sistema</h5>
             </div>
 
             <div class="card-body">
-                @* Descripción *@
+                @*Sistema ID*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Sistema ID</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Sistema.SistemaId" readonly />
+                </div>
+
+                @*Descripción*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Descripción</strong></label>
                     <InputText class="form-control" @bind-Value="Sistema.Descripcion" />
-                    <ValidationMessage For="@(() => Sistema.Descripcion)" />
+                    <ValidationMessage For="@(() => Sistema.Descripcion)" class="text-danger" />
                 </div>
 
-                @* Complejidad *@
+                @*Complejidad*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Complejidad</strong></label>
                     <InputSelect class="form-select" @bind-Value="Sistema.Complejidad">
@@ -38,7 +42,7 @@
                         <option value="Media">Media</option>
                         <option value="Alta">Alta</option>
                     </InputSelect>
-                    <ValidationMessage For="@(() => Sistema.Complejidad)" />
+                    <ValidationMessage For="@(() => Sistema.Complejidad)" class="text-danger" />
                 </div>
             </div>
 
@@ -66,18 +70,6 @@
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(Sistema.Descripcion))
-            {
-                ToastService.ShowWarning("La descripción es obligatoria.");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(Sistema.Complejidad))
-            {
-                ToastService.ShowWarning("Debe seleccionar una complejidad.");
-                return;
-            }
-
             var resultado = await SistemasService.Guardar(Sistema);
 
             if (resultado)
