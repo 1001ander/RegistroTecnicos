@@ -9,8 +9,8 @@ public class Clientes
     public int ClienteId { get; set; }
 
     [Required(ErrorMessage = "Campo Obligatorio")]
-    [Column(TypeName = "timestamp without time zone")]
-    public DateTime? FechaIngreso { get; set; } = DateTime.UtcNow;
+   // [Column(TypeName = "timestamp without time zone")]
+    public DateTime FechaIngreso { get; set; } = DateTime.Now;
 
     [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "solo se permiten Letras")]
     [Required(ErrorMessage = "Campo Obligatorio")]
