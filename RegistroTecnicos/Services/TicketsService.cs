@@ -76,7 +76,8 @@ public class TicketsService(IDbContextFactory<Contexto> DbFactory)
     }
     public async Task<List<Tickets>> FiltrarPorFecha(DateTime? desde, DateTime? hasta)
     {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
+ 
+       await using var contexto = await DbFactory.CreateDbContextAsync();
 
         var query = contexto.Tickets
             .Include(t => t.Cliente)
@@ -99,7 +100,6 @@ public class TicketsService(IDbContextFactory<Contexto> DbFactory)
 
         return await query.OrderByDescending(t => t.Fecha).ToListAsync();
     }
-
    
     public async Task<List<Tickets>> Filtrar(string filtro, DateTime? desde, DateTime? hasta)
     {
