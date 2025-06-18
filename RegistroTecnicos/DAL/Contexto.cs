@@ -1,5 +1,4 @@
-﻿using Anderson_Nunez_AP1_P1.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RegistroTecnicos.Models;
 
 namespace RegistroTecnicos.DAL;
