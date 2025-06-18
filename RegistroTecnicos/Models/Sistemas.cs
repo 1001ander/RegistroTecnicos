@@ -2,8 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Anderson_Nunez_AP1_P1.Models;
-
+namespace RegistroTecnicos.Models;
 public class Sistemas
 {
     [Key]
