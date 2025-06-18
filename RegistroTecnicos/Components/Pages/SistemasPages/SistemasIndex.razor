@@ -1,0 +1,211 @@
+﻿@page "/Sistemas/Index"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Linq.Expressions
+@using RegistroTecnicos.DAL
+@using RegistroTecnicos.Services
+@using RegistroTecnicos.Models
+@using BlazorBootstrap
+@using Blazored.Toast.Services
+
+@inject SistemasService SistemasService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+@rendermode InteractiveServer
+
+<PageTitle>Registro de Sistemas</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center position-relative">
+            <h5 class="card-title mb-0 text-center w-100">Registro de Sistemas</h5>
+        </div>
+
+        <div class="card-body">
+            @*Filtro*@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                </div>
+                <div class="col-md-5 d-flex align-items-end justify-content-end aling-items-end mt-3 mt-md-0">
+                    <a href="/Sistemas/Create" class="btn btn-success bi bi-plus-circle"> Crear</a>
+                </div>
+            </div>
+
+            <div class="row align-items-center mb-3">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="Id">Id</option>
+                        <option value="Descripcion">Descripción</option>
+                        <option value="Complejidad">Complejidad</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-primary" @onclick="Buscar">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row align-items-center mb-3">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por Complejidad</strong></label>
+                </div>
+                <div class="col-9">
+                    <div class="d-flex align-items-center gap-2">
+                        <InputSelect class="form-select" style="width: 200px;" @bind-Value="ComplejidadFiltro">
+                            <option value="">Todas las complejidades</option>
+                            <option value="Baja">Baja</option>
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                        </InputSelect>
+                        <button type="button" class="btn btn-info ms-2" @onclick="FiltrarPorComplejidad">
+                            <i class="bi bi-filter"></i> Aplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @*Tabla*@
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table table-striped text-black">
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripción</th>
+                            <th>Complejidad</th>
+                            <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ListaSistemas != null && ListaSistemas.Any())
+                        {
+                            @foreach (var sistema in ListaSistemas)
+                            {
+                                <tr>
+                                    <td>@sistema.SistemaId</td>
+                                    <td>
+                                        <div style="max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                             title="@sistema.Descripcion">
+                                            @sistema.Descripcion
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetBadgeClass(sistema.Complejidad)">
+                                            @sistema.Complejidad
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="/Sistemas/Edit/@sistema.SistemaId"
+                                           class="btn btn-outline-primary bi bi-pencil-square"
+                                           title="Editar sistema">
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">No se encontraron sistemas</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer space-between">
+            <label>Cantidad de sistemas: @(ListaSistemas?.Count() ?? 0)</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Sistemas> ListaSistemas { get; set; } = new();
+    private string Filtro { get; set; } = string.Empty;
+    private string ValorFiltro { get; set; } = string.Empty;
+    private string ComplejidadFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarSistemas();
+    }
+
+    private async Task CargarSistemas()
+    {
+        try
+        {
+            ListaSistemas = await SistemasService.ListarTodos();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al cargar sistemas: {ex.Message}");
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            await CargarSistemas();
+            return;
+        }
+
+        try
+        {
+            Expression<Func<Sistemas, bool>> criterio = Filtro switch
+            {
+                "Id" when int.TryParse(ValorFiltro, out int sistemaId) => s => s.SistemaId == sistemaId,
+                "Descripcion" => s => s.Descripcion.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                "Complejidad" => s => s.Complejidad.Contains(ValorFiltro, StringComparison.OrdinalIgnoreCase),
+                _ => s => true
+            };
+
+            ListaSistemas = await SistemasService.Listar(criterio);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al buscar: {ex.Message}");
+        }
+    }
+
+    private async Task FiltrarPorComplejidad()
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(ComplejidadFiltro))
+            {
+                ListaSistemas = await SistemasService.FiltrarPorComplejidad(ComplejidadFiltro);
+                ToastService.ShowSuccess($"Mostrando sistemas con complejidad: {ComplejidadFiltro}");
+            }
+            else
+            {
+                await CargarSistemas();
+                ToastService.ShowInfo("Mostrando todos los sistemas");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al filtrar por complejidad: {ex.Message}");
+        }
+    }
+
+    private string GetBadgeClass(string complejidad)
+    {
+        return complejidad?.ToLower() switch
+        {
+            "baja" => "bg-success",
+            "media" => "bg-warning",
+            "alta" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
