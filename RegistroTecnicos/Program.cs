@@ -13,8 +13,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 //Inyeccion del contexto
-builder.Services.AddDbContextFactory<Contexto>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//Contexto
+var ConString = builder.Configuration.GetConnectionString("ConStr");
+builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConString));
 
 builder.Services.AddBlazorBootstrap();
 
