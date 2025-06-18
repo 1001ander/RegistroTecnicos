@@ -22,7 +22,6 @@
 
         <div class="card-body">
             @*Filtro*@
-
             <div class="row">
                 <div class="col-3">
                     <label class="col-form-label"><strong>Filtrar por</strong></label>
@@ -51,12 +50,14 @@
                         <button type="button" class="btn btn-primary" @onclick="Buscar">
                             <i class="bi bi-search"></i> Buscar
                         </button>
+                        <button type="button" class="btn btn-secondary ms-1" @onclick="LimpiarFiltros">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </button>
                     </div>
                 </div>
             </div>
 
             @*Tabla*@
-
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table table-striped text-black">
@@ -156,6 +157,13 @@
         {
             ToastService.ShowError($"Error al buscar: {ex.Message}");
         }
+    }
+
+    private async Task LimpiarFiltros()
+    {
+        Filtro = "";
+        ValorFiltro = "";
+        await CargarSistemas();
     }
 
     private string GetBadgeClass(string complejidad)
