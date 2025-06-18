@@ -75,34 +75,4 @@ public class SistemasService(IDbContextFactory<Contexto> DbFactory)
             .AnyAsync(s => s.SistemaId != sistemaId &&
                 s.Descripcion.ToLower().Equals(descripcion.ToLower()));
     }
-
-    public async Task<List<Sistemas>> FiltrarPorComplejidad(string complejidad)
-    {
-        await using var contexto = await DbFactory.CreateDbContextAsync();
-
-        var query = contexto.Sistemas.AsQueryable();
-
-        if (!string.IsNullOrEmpty(complejidad))
-        {
-            query = query.Where(s => s.Complejidad.ToLower().Contains(complejidad.ToLower()));
-        }
-
-        return await query.OrderBy(s => s.Descripcion).ToListAsync();
-    }
-
-    public async Task<List<Sistemas>> Filtrar(string filtro, string valor)
-    {
-        Expression<Func<Sistemas, bool>> criterio = s => true;
-
-        if (filtro == "Descripcion" && !string.IsNullOrEmpty(valor))
-        {
-            criterio = s => s.Descripcion.ToLower().Contains(valor.ToLower());
-        }
-        else if (filtro == "Complejidad" && !string.IsNullOrEmpty(valor))
-        {
-            criterio = s => s.Complejidad.ToLower().Contains(valor.ToLower());
-        }
-
-        return await Listar(criterio);
-    }
 }
