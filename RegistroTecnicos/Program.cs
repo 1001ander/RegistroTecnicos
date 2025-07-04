@@ -31,6 +31,8 @@ builder.Services.AddScoped<TicketsService>();
 //Inyeccion del service de sistemas 
 builder.Services.AddScoped<SistemasService>();
 
+builder.Services.AddScoped<VentasService>();
+
 
 
 
