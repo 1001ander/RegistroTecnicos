@@ -16,10 +16,9 @@ public class Ventas
     public int ClienteId { get; set; }
 
     [InverseProperty("Venta")]
-    public virtual ICollection<VentasDetalle> VentasDetalles { get; set; }
+    public virtual ICollection<VentasDetalle> VentasDetalles { get; set; } = new List<VentasDetalle>();
 
     [ForeignKey("ClienteId")]
     [InverseProperty("Ventas")]
     public virtual Clientes Cliente { get; set; } = null!;
-
 }
