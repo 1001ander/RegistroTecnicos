@@ -35,6 +35,8 @@ public class Clientes
     public int TecnicoId { get; set; }
     public Tecnicos? Tecnico { get; set; }
 
+    public ICollection<Ventas> Ventas { get; set; } = new List<Ventas>();
+
 
 
 

@@ -12,8 +12,8 @@ using RegistroTecnicos.DAL;
 namespace RegistroTecnicos.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20250618004938_SistemasDB")]
-    partial class SistemasDB
+    [Migration("20250704025631_NewRegistro")]
+    partial class NewRegistro
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,29 +24,6 @@ namespace RegistroTecnicos.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Anderson_Nunez_AP1_P1.Models.Sistemas", b =>
-                {
-                    b.Property<int>("SistemaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SistemaId"));
-
-                    b.Property<string>("Complejidad")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("SistemaId");
-
-                    b.ToTable("Sistemas");
-                });
 
             modelBuilder.Entity("RegistroTecnicos.Models.Clientes", b =>
                 {
@@ -83,6 +60,38 @@ namespace RegistroTecnicos.Migrations
                     b.HasIndex("TecnicoId");
 
                     b.ToTable("Clientes");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.Sistemas", b =>
+                {
+                    b.Property<int>("SistemaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SistemaId"));
+
+                    b.Property<string>("Complejidad")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Existencia")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("precio")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("SistemaId");
+
+                    b.ToTable("Sistemas");
                 });
 
             modelBuilder.Entity("RegistroTecnicos.Models.Tecnicos", b =>
@@ -150,6 +159,56 @@ namespace RegistroTecnicos.Migrations
                     b.ToTable("Tickets");
                 });
 
+            modelBuilder.Entity("RegistroTecnicos.Models.Ventas", b =>
+                {
+                    b.Property<int>("VentaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VentaId"));
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("VentaId");
+
+                    b.HasIndex("ClienteId");
+
+                    b.ToTable("Ventas");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.VentasDetalle", b =>
+                {
+                    b.Property<int>("VentasDetalleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VentasDetalleId"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("SistemaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VentaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("VentasDetalleId");
+
+                    b.HasIndex("SistemaId");
+
+                    b.HasIndex("VentaId");
+
+                    b.ToTable("VentasDetalle");
+                });
+
             modelBuilder.Entity("RegistroTecnicos.Models.Clientes", b =>
                 {
                     b.HasOne("RegistroTecnicos.Models.Tecnicos", "Tecnico")
@@ -178,6 +237,51 @@ namespace RegistroTecnicos.Migrations
                     b.Navigation("Cliente");
 
                     b.Navigation("Tecnico");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.Ventas", b =>
+                {
+                    b.HasOne("RegistroTecnicos.Models.Clientes", "Cliente")
+                        .WithMany("Ventas")
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.VentasDetalle", b =>
+                {
+                    b.HasOne("RegistroTecnicos.Models.Sistemas", "Sistema")
+                        .WithMany("VentasDetalle")
+                        .HasForeignKey("SistemaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RegistroTecnicos.Models.Ventas", "Venta")
+                        .WithMany("VentasDetalles")
+                        .HasForeignKey("VentaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sistema");
+
+                    b.Navigation("Venta");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.Clientes", b =>
+                {
+                    b.Navigation("Ventas");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.Sistemas", b =>
+                {
+                    b.Navigation("VentasDetalle");
+                });
+
+            modelBuilder.Entity("RegistroTecnicos.Models.Ventas", b =>
+                {
+                    b.Navigation("VentasDetalles");
                 });
 #pragma warning restore 612, 618
         }

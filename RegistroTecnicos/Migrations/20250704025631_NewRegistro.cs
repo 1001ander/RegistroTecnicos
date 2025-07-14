@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RegistroTecnicos.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class NewRegistro : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Sistemas",
+                columns: table => new
+                {
+                    SistemaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Descripcion = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Complejidad = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Existencia = table.Column<int>(type: "int", nullable: false),
+                    precio = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sistemas", x => x.SistemaId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Tecnicos",
                 columns: table => new
@@ -80,6 +97,54 @@ namespace RegistroTecnicos.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Ventas",
+                columns: table => new
+                {
+                    VentaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ClienteId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ventas", x => x.VentaId);
+                    table.ForeignKey(
+                        name: "FK_Ventas_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "ClienteId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VentasDetalle",
+                columns: table => new
+                {
+                    VentasDetalleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Cantidad = table.Column<int>(type: "int", nullable: false),
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SistemaId = table.Column<int>(type: "int", nullable: false),
+                    VentaId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VentasDetalle", x => x.VentasDetalleId);
+                    table.ForeignKey(
+                        name: "FK_VentasDetalle_Sistemas_SistemaId",
+                        column: x => x.SistemaId,
+                        principalTable: "Sistemas",
+                        principalColumn: "SistemaId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VentasDetalle_Ventas_VentaId",
+                        column: x => x.VentaId,
+                        principalTable: "Ventas",
+                        principalColumn: "VentaId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Clientes_TecnicoId",
                 table: "Clientes",
@@ -94,6 +159,21 @@ namespace RegistroTecnicos.Migrations
                 name: "IX_Tickets_TecnicoId",
                 table: "Tickets",
                 column: "TecnicoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ventas_ClienteId",
+                table: "Ventas",
+                column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VentasDetalle_SistemaId",
+                table: "VentasDetalle",
+                column: "SistemaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VentasDetalle_VentaId",
+                table: "VentasDetalle",
+                column: "VentaId");
         }
 
         /// <inheritdoc />
@@ -101,6 +181,15 @@ namespace RegistroTecnicos.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Tickets");
+
+            migrationBuilder.DropTable(
+                name: "VentasDetalle");
+
+            migrationBuilder.DropTable(
+                name: "Sistemas");
+
+            migrationBuilder.DropTable(
+                name: "Ventas");
 
             migrationBuilder.DropTable(
                 name: "Clientes");
