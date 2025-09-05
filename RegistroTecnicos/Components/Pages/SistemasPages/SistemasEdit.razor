@@ -1,0 +1,142 @@
+﻿@page "/Sistemas/Edit/{SistemaId:int}"
+@using RegistroTecnicos.Models
+@using RegistroTecnicos.Services
+@using Blazored.Toast.Services
+@inject SistemasService sistemasService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Editar Sistema</PageTitle>
+
+<EditForm Model="Sistema" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center bg-primary text-white">
+                <h5 class="card-title">Editar Sistema</h5>
+            </div>
+
+            <div class="card-body">
+                @* Campo Descripción *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Descripción</strong></label>
+                    <InputText class="form-control" @bind-Value="Sistema.Descripcion" />
+                    <ValidationMessage For="@(() => Sistema.Descripcion)" />
+                </div>
+
+                @* Campo Complejidad *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Complejidad</strong></label>
+                    <InputText class="form-control" @bind-Value="Sistema.Complejidad" />
+                    <ValidationMessage For="@(() => Sistema.Complejidad)" />
+                </div>
+            </div>
+
+            <div class="card-footer text-center">
+                <button type="button" class="btn btn-secondary me-2" @onclick="Volver">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+                <button type="submit" class="btn btn-success me-2">
+                    <i class="bi bi-check-circle"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" @onclick="Eliminar">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int SistemaId { get; set; }
+
+    public Sistemas Sistema { get; set; } = new Sistemas();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var sistemaExistente = await sistemasService.Buscar(SistemaId);
+            if (sistemaExistente is null)
+            {
+                toastService.ShowError("Sistema no encontrado.");
+                navigationManager.NavigateTo("/Sistemas/Index");
+                return;
+            }
+
+            Sistema = sistemaExistente;
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al cargar datos: {ex.Message}");
+        }
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Sistemas/Index");
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            // Validar que no exista duplicado
+            if (await sistemasService.ExisteSistema(Sistema.SistemaId, Sistema.Descripcion!))
+            {
+                toastService.ShowWarning("Ya existe un sistema con esa descripción.");
+                return;
+            }
+
+            var resultado = await sistemasService.Guardar(Sistema);
+            if (resultado)
+            {
+                toastService.ShowSuccess("Sistema guardado correctamente");
+                navigationManager.NavigateTo("/Sistemas/Index");
+            }
+            else
+            {
+                toastService.ShowError("No se pudo guardar el sistema");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al guardar: {ex.Message}");
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        if (Sistema.SistemaId == 0)
+        {
+            toastService.ShowWarning("Este sistema no puede eliminarse porque no ha sido guardado.");
+            return;
+        }
+
+        try
+        {
+            var confirmado = await jsRuntime.InvokeAsync<bool>("confirm", "¿Está seguro de eliminar este sistema?");
+            if (!confirmado) return;
+
+            var eliminado = await sistemasService.Eliminar(Sistema.SistemaId);
+            if (eliminado)
+            {
+                toastService.ShowSuccess("Sistema eliminado correctamente");
+                navigationManager.NavigateTo("/Sistemas/Index");
+            }
+            else
+            {
+                toastService.ShowError("No se pudo eliminar el sistema");
+            }
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Error al eliminar: {ex.Message}");
+        }
+    }
+}

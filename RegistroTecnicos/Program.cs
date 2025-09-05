@@ -11,14 +11,29 @@ builder.Services.AddBlazoredToast();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 //Inyeccion del contexto
-builder.Services.AddDbContextFactory<Contexto>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+//Contexto
+var ConString = builder.Configuration.GetConnectionString("ConStr");
+builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConString));
 
 builder.Services.AddBlazorBootstrap();
 
 //Inyeccion del service
 builder.Services.AddScoped<TecnicosService>();
+
+//Inyeccion del service de cliente 
+builder.Services.AddScoped<ClientesService>();
+
+//Inyeccion del service de tickets
+builder.Services.AddScoped<TicketsService>();
+
+//Inyeccion del service de sistemas 
+builder.Services.AddScoped<SistemasService>();
+
+builder.Services.AddScoped<VentasService>();
+
+
 
 
 
